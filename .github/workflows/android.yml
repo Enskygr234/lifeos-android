@@ -30,7 +30,7 @@ jobs:
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
             echo "APP_VERSION=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
           else
-            echo "APP_VERSION=dev-${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+            echo "APP_VERSION=v$(tr -d '[:space:]' < VERSION)" >> "$GITHUB_ENV"
           fi
 
       - name: İmzalama anahtarını hazırla (varsa)
@@ -137,17 +137,36 @@ jobs:
 
   release:
     name: GitHub Release
-    if: startsWith(github.ref, 'refs/tags/v')
+    # v* etiketi gönderildiğinde veya main'de VERSION henüz yayınlanmamış bir sürümse
+    if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main')
     needs: [build, instrumented]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+      - name: Sürüm etiketini belirle
+        id: tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then tag="$GITHUB_REF_NAME"; else tag="v$(tr -d '[:space:]' < VERSION)"; fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if [[ "$GITHUB_REF" != refs/tags/v* ]] && gh release view "$tag" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"; echo "$tag zaten yayınlanmış; atlanıyor."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/download-artifact@v4
+        if: steps.tag.outputs.skip == 'false'
         with:
           name: LifeOS-apk
           path: dist
       - uses: softprops/action-gh-release@v2
+        if: steps.tag.outputs.skip == 'false'
         with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: LifeOS ${{ steps.tag.outputs.tag }}
+          body_path: RELEASE_NOTES.md
           files: dist/*
-          generate_release_notes: true
