@@ -108,12 +108,16 @@ jobs:
           target: default
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          script: ./gradlew connectedDebugAndroidTest --stacktrace
+          script: |
+            ./gradlew connectedDebugAndroidTest --stacktrace
+            bash scripts/screenshots.sh screenshots
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: androidTest-reports
-          path: app/build/reports/androidTests/
+          path: |
+            app/build/reports/androidTests/
+            screenshots/
           if-no-files-found: ignore
 
   release:
