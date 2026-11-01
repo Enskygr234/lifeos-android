@@ -17,8 +17,9 @@ tap_desc() {
   local xml
   xml=$(adb exec-out cat /sdcard/ui.xml)
   local b
-  b=$(printf '%s' "$xml" | grep -o "content-desc=\"$desc\"[^>]*bounds=\"\[[0-9]*,[0-9]*\]\[[0-9]*,[0-9]*\]\"" | head -1 \
-      | grep -o '\[[0-9]*,[0-9]*\]\[[0-9]*,[0-9]*\]')
+  # Önce content-desc (simge düğmeleri), sonra text (alt menü etiketleri) ile ara
+  b=$(printf '%s' "$xml" | grep -o -E "(content-desc|text)=\"$desc\"[^>]*bounds=\"\[[0-9]+,[0-9]+\]\[[0-9]+,[0-9]+\]\"" | head -1 \
+      | grep -o -E '\[[0-9]+,[0-9]+\]\[[0-9]+,[0-9]+\]')
   if [ -z "$b" ]; then
     echo "Bulunamadı: $desc"
     return 1
@@ -37,9 +38,12 @@ shot() {
 
 shot 01_ana_sayfa
 i=2
-for d in "Görevler" "Alışkanlık" "Notlar" "Takvim" "İstatistikler" "Ayarlar"; do
+for pair in "Görevler:gorevler" "Alışkanlık:aliskanliklar" "Notlar:notlar" "Takvim:takvim" \
+            "İstatistikler:istatistikler" "Ayarlar:ayarlar"; do
+  d="${pair%%:*}"
+  name="${pair##*:}"
   if tap_desc "$d"; then
-    shot "$(printf '%02d' $i)_$(echo "$d" | tr 'A-ZÇĞİÖŞÜ' 'a-zçğiöşü')"
+    shot "$(printf '%02d' $i)_$name"
   fi
   i=$((i + 1))
 done

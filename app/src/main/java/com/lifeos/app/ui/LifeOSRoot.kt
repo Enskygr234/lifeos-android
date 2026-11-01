@@ -31,6 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -116,7 +118,10 @@ fun LifeOSRoot(vm: AppViewModel) {
                         selected = route == d.route,
                         onClick = { nav.goTab(d.route) },
                         icon = { Icon(d.icon, d.label) },
-                        label = { Text(d.label, maxLines = 1) },
+                        label = {
+                            Text(d.label, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis,
+                                fontSize = 10.5.sp)
+                        },
                         modifier = Modifier.testTag("nav_${d.route}"),
                         colors = NavigationBarItemDefaults.colors(
                             indicatorColor = MaterialTheme.colorScheme.primaryContainer,
