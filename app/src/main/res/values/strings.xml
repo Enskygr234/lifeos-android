@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LifeOS</string>
+    <string name="channel_reminders">Görev hatırlatıcıları</string>
+    <string name="channel_summary">Günün özeti</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="lifeos_bg">#FF0B0B14</color>
+    <color name="ic_launcher_background">#FF120E24</color>
+
+    <style name="Theme.LifeOS" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/lifeos_bg</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+</resources>
